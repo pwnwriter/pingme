@@ -20,13 +20,8 @@
         default = pkgs.mkShell {
 
           packages = with pkgs; [
-            bun
-            typescript-language-server
-            astro-language-server
-            tailwindcss-language-server
-            harper # Spelling check
-            rumdl # Markdown formating and check
-            nodejs
+            # add pkgs here
+
           ];
 
           buildInputs = with pkgs; [ pkg-config ];
