@@ -1,6 +1,10 @@
+
 # pingme
 
-Scans for upcoming hackathons and CTF competitions near you and sends Discord notifications. Runs on GitHub Actions — no server needed.
+***Scans for upcoming hackathons and CTF competitions near you and sends Discord notifications. Runs on GitHub Actions — no server needed***
+
+<img width="368" height="290" alt="Screenshot 2026-06-08 at 12 51 26 AM" src="https://github.com/user-attachments/assets/e0a3467c-087b-4013-b542-3f00a6c31fee" />
+
 
 ## Why
 
