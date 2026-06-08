@@ -2,11 +2,11 @@ import httpx
 from datetime import datetime, timedelta, timezone
 from selectolax.parser import HTMLParser
 
-from models import Event
-from sources.ctftime import haversine
+from src.models import Event
+from src.sources.ctftime import haversine
 
 
-MLH_URL = "https://mlh.io/seasons/2025/events"
+MLH_URL = "https://www.mlh.com/seasons/2026/events"
 
 
 def fetch_events(config: dict) -> list[Event]:

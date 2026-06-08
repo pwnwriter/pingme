@@ -2,7 +2,7 @@ name: Scan for Events
 
 on:
   schedule:
-    - cron: '0 13 * * *'  # 9am EST daily
+    - cron: '0 13 * * 1,4'  # 9am EST, Monday & Thursday
   workflow_dispatch:
 
 jobs:
@@ -15,5 +15,6 @@ jobs:
 
       - name: Run scanner
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
         run: uv run main.py

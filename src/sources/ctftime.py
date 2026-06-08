@@ -2,7 +2,7 @@ import httpx
 from datetime import datetime, timedelta, timezone
 from math import radians, cos, sin, asin, sqrt
 
-from models import Event
+from src.models import Event
 
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

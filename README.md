@@ -10,17 +10,37 @@ I missed more than 10 CTF competitions just because I didn't know they were happ
 
 1. Fork this repo
 2. Edit `config.yaml` with your location
-3. Add `DISCORD_WEBHOOK_URL` as a GitHub Actions secret
-4. Run from Actions tab or wait for the daily cron
+3. Add `DISCORD_BOT_TOKEN` and `DISCORD_CHANNEL_ID` as GitHub Actions secrets
+4. Run from the Actions tab or wait for the next scheduled scan (Monday & Thursday, 9am EST)
 
 <details>
-<summary>Discord webhook setup</summary>
+<summary>Discord bot setup</summary>
 
-1. Go to your Discord server → **Server Settings** → **Integrations** → **Webhooks**
-2. Create a new webhook, pick your channel, copy the URL
-3. In your fork → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
-   - Name: `DISCORD_WEBHOOK_URL`
-   - Value: your webhook URL
+> Full reference: [Discord Developer Docs — Getting Started](https://discord.com/developers/docs/getting-started)
+
+**Create the bot:**
+
+1. Go to [discord.com/developers/applications](https://discord.com/developers/applications) → **New Application**
+2. Go to **Bot** → click **Reset Token** → copy the token (you'll only see it once)
+3. Under **Privileged Gateway Intents**, enable **Message Content Intent**
+
+**Invite it to your server:**
+
+4. Go to **OAuth2** → **URL Generator**
+5. Scope: `bot`
+6. Permissions: `Send Messages`, `Manage Messages`, `Read Message History`, `View Channels`
+7. Open the generated URL → select your server → **Authorize**
+
+**Get the channel ID:**
+
+8. In Discord → **User Settings** → **App Settings** → **Advanced** → enable **Developer Mode**
+9. Right-click the channel you want notifications in → **Copy Channel ID**
+
+**Add secrets to GitHub:**
+
+10. In your fork → **Settings** → **Secrets and variables** → **Actions** → add two secrets:
+    - `DISCORD_BOT_TOKEN` — your bot token
+    - `DISCORD_CHANNEL_ID` — the channel ID
 
 </details>
 
@@ -58,7 +78,7 @@ notify:
 <summary>Run locally</summary>
 
 ```bash
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..." uv run main.py
+DISCORD_BOT_TOKEN="your-token" DISCORD_CHANNEL_ID="123456" uv run main.py
 ```
 
 </details>

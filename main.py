@@ -1,11 +1,10 @@
-import sys
 from pathlib import Path
 
 import yaml
 
-from models import Event
-from sources import ctftime, mlh
-from notifiers import discord
+from src.models import Event
+from src.sources import ctftime, mlh
+from src.notifiers import discord
 
 
 def load_config() -> dict:
