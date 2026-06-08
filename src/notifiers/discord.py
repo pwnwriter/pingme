@@ -70,30 +70,41 @@ def send_events(events: list[Event]) -> None:
     _purge_old_messages(channel_id, bot_id)
 
     now = datetime.now(timezone.utc)
-    timestamp = f"<t:{int(now.timestamp())}:f>"
+    ts = f"<t:{int(now.timestamp())}:f>"
 
     if not events:
         _send_message(channel_id, {
             "embeds": [{
-                "title": "No upcoming events found",
-                "description": f"Scanned on {timestamp}\nNo hackathons or CTFs found nearby in the next 21 days.",
-                "color": 0x95A5A6,
+                "title": "// NO TARGETS FOUND",
+                "description": f"```\n[SCAN COMPLETE] {ts}\n[STATUS] No events detected within radius\n[NEXT SCAN] Monday/Thursday 0900 EST\n```",
+                "color": 0x0D0D0D,
             }],
         })
         return
 
-    # Header message
+    onsite = [e for e in events if not e.online]
+    online = [e for e in events if e.online]
+
+    # Header
+    header_lines = [
+        f"[SCAN COMPLETE] {ts}",
+        f"[TARGETS]       {len(events)} events detected",
+        f"[ONSITE]        {len(onsite)}",
+        f"[REMOTE]        {len(online)}",
+        f"[RANGE]         21 days",
+    ]
     _send_message(channel_id, {
         "embeds": [{
-            "title": f"Found {len(events)} upcoming events",
-            "description": f"Scanned on {timestamp}\nShowing hackathons & CTFs within your configured radius.",
-            "color": 0x3498DB,
+            "title": f"// SCAN REPORT \u2014 {len(events)} TARGETS",
+            "description": f"```ansi\n\u001b[0;32m" + "\n".join(header_lines) + "\n\u001b[0m```",
+            "color": 0x00FF41,
         }],
     })
 
-    # Send events in batches of 10
-    for i in range(0, len(events), 10):
-        batch = events[i:i + 10]
+    # Send onsite first, then online
+    all_events = onsite + online
+    for i in range(0, len(all_events), 5):
+        batch = all_events[i:i + 5]
         _send_message(channel_id, {
             "embeds": [e.embed_dict() for e in batch],
         })

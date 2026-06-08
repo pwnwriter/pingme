@@ -1,16 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-COLORS = {
-    "CTFtime": 0xE74C3C,   # red
-    "MLH": 0x2ECC71,       # green
-}
-
-SOURCE_ICONS = {
-    "CTFtime": "https://ctftime.org/static/images/ct/favicon-32x32.png",
-    "MLH": "https://static.mlh.io/brand-assets/logo/official/mlh-logo-color.png",
-}
-
 
 @dataclass
 class Event:
@@ -26,50 +16,58 @@ class Event:
 
     def _days_until(self) -> int:
         now = datetime.now(timezone.utc)
-        return (self.start.replace(tzinfo=timezone.utc) - now).days
+        return max(0, (self.start.replace(tzinfo=timezone.utc) - now).days)
+
+    def _urgency_color(self) -> int:
+        days = self._days_until()
+        if days <= 1:
+            return 0xFF0033  # red alert
+        if days <= 5:
+            return 0x00FF41  # matrix green
+        return 0x0D0D0D      # dark
 
     def embed_dict(self) -> dict:
         days = self._days_until()
-        if days <= 1:
-            urgency = "TOMORROW"
-        elif days <= 3:
-            urgency = f"in {days} days"
+        ts = int(self.start.replace(tzinfo=timezone.utc).timestamp())
+        ts_end = int(self.end.replace(tzinfo=timezone.utc).timestamp())
+
+        if days == 0:
+            tag = "[!] LIVE NOW"
+        elif days == 1:
+            tag = "[!] T-1 DAY"
+        elif days <= 5:
+            tag = f"[*] T-{days} DAYS"
         else:
-            urgency = f"in {days} days"
+            tag = f"[ ] T-{days} DAYS"
 
-        time_str = f"<t:{int(self.start.replace(tzinfo=timezone.utc).timestamp())}:F>"
-        time_relative = f"<t:{int(self.start.replace(tzinfo=timezone.utc).timestamp())}:R>"
+        if self.online:
+            loc = "`REMOTE`"
+        else:
+            loc = f"`{self.location.upper()}`"
 
-        location_val = self.location if not self.online else "Online"
-
-        lines = []
+        desc_lines = []
         if self.description:
-            desc = self.description[:150].strip()
-            if desc:
-                lines.append(f"*{desc}*")
-        lines.append("")
-        lines.append(f"**Starts:** {time_str} ({time_relative})")
-        lines.append(f"**Location:** {location_val}")
-        if self.format:
-            lines.append(f"**Format:** {self.format}")
+            clean = self.description[:120].strip()
+            if clean:
+                desc_lines.append(f"```\n{clean}\n```")
 
-        color = COLORS.get(self.source, 0x5865F2)
-        badge = "ONSITE" if not self.online else "ONLINE"
+        desc_lines.append(f"**START** \u2192 <t:{ts}:F>")
+        desc_lines.append(f"**END** \u2192 <t:{ts_end}:F>")
+        desc_lines.append(f"**ETA** \u2192 <t:{ts}:R>")
 
-        embed = {
-            "title": f"{self.name}",
+        mode = "ONSITE" if not self.online else "REMOTE"
+        fmt = self.format.upper() if self.format else "N/A"
+
+        return {
+            "title": f"{tag} // {self.name}",
             "url": self.url,
-            "description": "\n".join(lines),
-            "color": color,
-            "footer": {
-                "text": f"{self.source} | {badge}",
-                "icon_url": SOURCE_ICONS.get(self.source, ""),
-            },
+            "description": "\n".join(desc_lines),
+            "color": self._urgency_color(),
+            "fields": [
+                {"name": "> LOC", "value": loc, "inline": True},
+                {"name": "> MODE", "value": f"`{mode}`", "inline": True},
+                {"name": "> TYPE", "value": f"`{fmt}`", "inline": True},
+                {"name": "> SRC", "value": f"`{self.source.upper()}`", "inline": True},
+            ],
+            "footer": {"text": f"// pingme v0.1 | {self.source}"},
         }
-
-        if days <= 1:
-            embed["title"] = f"[TOMORROW] {self.name}"
-        elif days <= 3:
-            embed["title"] = f"[SOON] {self.name}"
-
-        return embed
