@@ -1,0 +1,13 @@
+location:
+  city: "Baltimore"
+  lat: 39.2904
+  lon: -76.6122
+  radius_km: 200
+  include_online: true
+
+sources:
+  ctftime: true
+  mlh: true
+
+notify:
+  days_ahead: 21
