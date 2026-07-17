@@ -21,10 +21,20 @@ class Event:
     def _urgency_color(self) -> int:
         days = self._days_until()
         if days <= 1:
-            return 0xFF0033  # red alert
+            return 0xED4245  # Discord red \u2014 urgent
         if days <= 5:
-            return 0x00FF41  # matrix green
-        return 0x0D0D0D      # dark
+            return 0xFEE75C  # Discord yellow \u2014 coming up
+        return 0x5865F2      # Discord blurple \u2014 later
+
+    def _status_emoji(self) -> str:
+        days = self._days_until()
+        if days == 0:
+            return "\ud83d\udd34"
+        if days == 1:
+            return "\ud83d\udfe0"
+        if days <= 5:
+            return "\ud83d\udfe1"
+        return "\ud83d\udd35"
 
     def embed_dict(self) -> dict:
         days = self._days_until()
@@ -32,42 +42,33 @@ class Event:
         ts_end = int(self.end.replace(tzinfo=timezone.utc).timestamp())
 
         if days == 0:
-            tag = "[!] LIVE NOW"
+            when = "**Happening today**"
         elif days == 1:
-            tag = "[!] T-1 DAY"
-        elif days <= 5:
-            tag = f"[*] T-{days} DAYS"
+            when = "**Starts tomorrow**"
         else:
-            tag = f"[ ] T-{days} DAYS"
+            when = f"**Starts in {days} days**"
 
-        if self.online:
-            loc = "`REMOTE`"
-        else:
-            loc = f"`{self.location.upper()}`"
-
-        desc_lines = []
+        desc_lines = [when]
         if self.description:
-            clean = self.description[:120].strip()
+            clean = self.description[:200].strip()
             if clean:
-                desc_lines.append(f"```\n{clean}\n```")
+                desc_lines.append(f"> {clean}")
 
-        desc_lines.append(f"**START** \u2192 <t:{ts}:F>")
-        desc_lines.append(f"**END** \u2192 <t:{ts_end}:F>")
-        desc_lines.append(f"**ETA** \u2192 <t:{ts}:R>")
-
-        mode = "ONSITE" if not self.online else "REMOTE"
-        fmt = self.format.upper() if self.format else "N/A"
+        where = "\ud83c\udf10 Remote" if self.online else f"\ud83d\udccd {self.location}"
+        fmt = self.format.title() if self.format else "\u2014"
 
         return {
-            "title": f"{tag} // {self.name}",
+            "title": f"{self._status_emoji()} {self.name}",
             "url": self.url,
             "description": "\n".join(desc_lines),
             "color": self._urgency_color(),
             "fields": [
-                {"name": "> LOC", "value": loc, "inline": True},
-                {"name": "> MODE", "value": f"`{mode}`", "inline": True},
-                {"name": "> TYPE", "value": f"`{fmt}`", "inline": True},
-                {"name": "> SRC", "value": f"`{self.source.upper()}`", "inline": True},
+                {"name": "Where", "value": where, "inline": True},
+                {"name": "Format", "value": fmt, "inline": True},
+                {"name": "Source", "value": self.source, "inline": True},
+                {"name": "Starts", "value": f"<t:{ts}:f>", "inline": True},
+                {"name": "Ends", "value": f"<t:{ts_end}:f>", "inline": True},
+                {"name": "Starts in", "value": f"<t:{ts}:R>", "inline": True},
             ],
-            "footer": {"text": f"// pingme v0.1 | {self.source}"},
+            "footer": {"text": "pingme"},
         }

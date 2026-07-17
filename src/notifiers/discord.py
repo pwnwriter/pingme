@@ -75,9 +75,13 @@ def send_events(events: list[Event]) -> None:
     if not events:
         _send_message(channel_id, {
             "embeds": [{
-                "title": "// NO TARGETS FOUND",
-                "description": f"```\n[SCAN COMPLETE] {ts}\n[STATUS] No events detected within radius\n[NEXT SCAN] Monday/Thursday 0900 EST\n```",
-                "color": 0x0D0D0D,
+                "title": "🌙 No Upcoming Events",
+                "description": (
+                    "Nothing found in range right now — check back soon.\n\n"
+                    "**Next scan:** Mon/Thu, 9:00 AM EST"
+                ),
+                "color": 0x5865F2,
+                "footer": {"text": f"Last checked {ts}"},
             }],
         })
         return
@@ -86,18 +90,17 @@ def send_events(events: list[Event]) -> None:
     online = [e for e in events if e.online]
 
     # Header
-    header_lines = [
-        f"[SCAN COMPLETE] {ts}",
-        f"[TARGETS]       {len(events)} events detected",
-        f"[ONSITE]        {len(onsite)}",
-        f"[REMOTE]        {len(online)}",
-        f"[RANGE]         21 days",
-    ]
+    plural = "s" if len(events) != 1 else ""
     _send_message(channel_id, {
         "embeds": [{
-            "title": f"// SCAN REPORT \u2014 {len(events)} TARGETS",
-            "description": f"```ansi\n\u001b[0;32m" + "\n".join(header_lines) + "\n\u001b[0m```",
-            "color": 0x00FF41,
+            "title": "📡 Event Scan",
+            "description": f"Found **{len(events)}** upcoming event{plural} in the next 21 days.",
+            "color": 0x57F287,
+            "fields": [
+                {"name": "📍 Onsite", "value": str(len(onsite)), "inline": True},
+                {"name": "🌐 Remote", "value": str(len(online)), "inline": True},
+            ],
+            "footer": {"text": f"Scanned {ts}"},
         }],
     })
 
