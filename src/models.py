@@ -29,12 +29,12 @@ class Event:
     def _status_emoji(self) -> str:
         days = self._days_until()
         if days == 0:
-            return "\ud83d\udd34"
+            return "\U0001F534"  # red circle
         if days == 1:
-            return "\ud83d\udfe0"
+            return "\U0001F7E0"  # orange circle
         if days <= 5:
-            return "\ud83d\udfe1"
-        return "\ud83d\udd35"
+            return "\U0001F7E1"  # yellow circle
+        return "\U0001F535"      # blue circle
 
     def embed_dict(self) -> dict:
         days = self._days_until()
@@ -54,7 +54,7 @@ class Event:
             if clean:
                 desc_lines.append(f"> {clean}")
 
-        where = "\ud83c\udf10 Remote" if self.online else f"\ud83d\udccd {self.location}"
+        where = "\U0001F310 Remote" if self.online else f"\U0001F4CD {self.location}"
         fmt = self.format.title() if self.format else "\u2014"
 
         return {
